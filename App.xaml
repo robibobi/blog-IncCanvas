@@ -1,0 +1,9 @@
+﻿<Application
+    x:Class="Tcoc.InkDrawingSample.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Tcoc.InkDrawingSample"
+    xmlns:viewmodels="using:Tcoc.InkDrawingSample.ViewModels"
+    RequestedTheme="Light">
+
+</Application>
