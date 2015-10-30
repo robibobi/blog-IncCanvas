@@ -37,7 +37,7 @@ namespace Tcoc.InkDrawingSample
 
             InkDrawingAttributes da = TheInkCanvas.InkPresenter.CopyDefaultDrawingAttributes();
             da.Size = new Windows.Foundation.Size(3, 3);
-            da.Color = Colors.Black;
+            da.Color = Colors.Red;
             TheInkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(da);
         }
 
@@ -61,7 +61,7 @@ namespace Tcoc.InkDrawingSample
             await SaveStrokesToBitmap(mImage);
             FileSavePicker savePicker = new FileSavePicker();
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-            savePicker.FileTypeChoices.Add("Bitmap Image", new List<string>() { ".bmp" });
+            savePicker.FileTypeChoices.Add("bmp Image", new List<string>() { ".bmp" });
             savePicker.SuggestedFileName = "inkImage";
             StorageFile f = await savePicker.PickSaveFileAsync();
             if (f != null)
@@ -75,10 +75,15 @@ namespace Tcoc.InkDrawingSample
 
         private async Task SaveStrokesToBitmap(WriteableBitmap b)
         {
+            Rect imgRect = new Rect(0, 0, b.PixelWidth, b.PixelHeight);
             InkStrokeContainer container = TheInkCanvas.InkPresenter.StrokeContainer;
             InkStrokeBuilder builder = new InkStrokeBuilder();
-            Rect imgRect = new Rect(0, 0, b.PixelWidth, b.PixelHeight);
-          
+
+            // Unsichtbare Tinte!
+            InkDrawingAttributes da = TheInkCanvas.InkPresenter.CopyDefaultDrawingAttributes();
+            da.Size = new Size(0.1, 0.1);
+            builder.SetDefaultDrawingAttributes(da);
+
             // Strich in oberer linker Ecke einfügen
             InkStroke topLeft = builder.CreateStroke(new List<Point>() {
                 new Point(1, 1),
@@ -88,15 +93,17 @@ namespace Tcoc.InkDrawingSample
             // Strich in unterer Rechter Ecke einfügen
             InkStroke bottomRight = builder.CreateStroke(new List<Point>() {
                 new Point(imgRect.Width -2, imgRect.Height -2),
-                new Point(imgRect.Width -1, imgRect.Height -1) });
+                new Point(imgRect.Width -1, imgRect.Height -1) });   
             container.AddStroke(bottomRight);
 
             // Striche in WriteableBitmap speichern
             WriteableBitmap bmp;
-            using (InMemoryRandomAccessStream ims = new InMemoryRandomAccessStream())
+            using (InMemoryRandomAccessStream ims =
+                new InMemoryRandomAccessStream())
             {
                 await container.SaveAsync(ims);
-                bmp = await new WriteableBitmap(1, 1).FromStream(ims, BitmapPixelFormat.Bgra8);
+                bmp = await new WriteableBitmap(1, 1)
+                    .FromStream(ims, BitmapPixelFormat.Bgra8);
             }
             // Bilder zusammenfügen
             b.Blit(imgRect, bmp, imgRect, WriteableBitmapExtensions.BlendMode.Alpha);
